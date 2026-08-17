@@ -3,7 +3,7 @@ import requests
 import base64
 import urllib.parse
 
-st.set_page_config(page_title="Simple Social", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="Moment", page_icon="M", layout="wide")
 
 # ---------------------------------------------------------------------------
 # Global styling
@@ -41,9 +41,22 @@ st.markdown("""
     .post-caption { margin-top: 0.6rem; font-size: 0.95rem; color: rgba(255,255,255,0.85); }
 
     .login-wrapper { max-width: 420px; margin: 2rem auto 0 auto; }
-    .login-title { text-align: center; margin-bottom: 0.2rem; }
+    .login-title {
+        text-align: center;
+        margin-bottom: 0.2rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 800;
+    }
     .login-subtitle { text-align: center; color: rgba(255,255,255,0.5); margin-bottom: 1.8rem; }
 
+    .sidebar-brand {
+        font-size: 1.3rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+    }
     .sidebar-greeting { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.2rem; }
 </style>
 """, unsafe_allow_html=True)
@@ -70,7 +83,7 @@ def get_headers():
 # ---------------------------------------------------------------------------
 def login_page():
     st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
-    st.markdown('<h1 class="login-title">🚀 Simple Social</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="login-title">Moment</h1>', unsafe_allow_html=True)
     st.markdown('<p class="login-subtitle">Share moments with people who matter</p>', unsafe_allow_html=True)
 
     email = st.text_input("Email", placeholder="you@example.com")
@@ -119,7 +132,7 @@ def login_page():
 # Upload page
 # ---------------------------------------------------------------------------
 def upload_page():
-    st.title("📸 Share Something")
+    st.title("Share Something")
     st.caption("Post a photo or video for your feed")
 
     uploaded_file = st.file_uploader(
@@ -143,7 +156,7 @@ def upload_page():
             response = requests.post("http://localhost:8000/upload", files=files, data=data, headers=get_headers())
 
         if response.status_code == 200:
-            st.toast("Uploaded successfully! 🎉", icon="✅")
+            st.toast("Uploaded successfully!")
             st.session_state.upload_counter += 1
             st.rerun()
         else:
@@ -173,7 +186,7 @@ def create_transformed_url(original_url, transformation_params, caption=None):
     return f"{base_url}/tr:{transformation_params}/{file_path}"
 
 def feed_page():
-    st.title("🏠 Feed")
+    st.title("Feed")
 
     response = requests.get("http://localhost:8000/feed", headers=get_headers())
     if response.status_code == 200:
@@ -199,12 +212,12 @@ def feed_page():
                 )
             with col2:
                 if post.get('is_owner', False):
-                    if st.button("🗑️", key=f"delete_{post['id']}", help="Delete post"):
+                    if st.button("Delete", key=f"delete_{post['id']}", help="Delete post"):
                         del_response = requests.delete(
                             f"http://localhost:8000/posts/{post['id']}", headers=get_headers()
                         )
                         if del_response.status_code == 200:
-                            st.toast("Post deleted", icon="🗑️")
+                            st.toast("Post deleted")
                             st.rerun()
                         else:
                             st.error("Failed to delete post!")
@@ -229,8 +242,9 @@ def feed_page():
 if st.session_state.user is None:
     login_page()
 else:
+    st.sidebar.markdown('<div class="sidebar-brand">Moment</div>', unsafe_allow_html=True)
     st.sidebar.markdown(
-        f'<div class="sidebar-greeting">👋 Hi, {st.session_state.user["email"].split("@")[0]}!</div>',
+        f'<div class="sidebar-greeting">Hi, {st.session_state.user["email"].split("@")[0]}!</div>',
         unsafe_allow_html=True
     )
     st.sidebar.caption(st.session_state.user["email"])
@@ -241,9 +255,9 @@ else:
         st.rerun()
 
     st.sidebar.markdown("---")
-    page = st.sidebar.radio("Navigate", ["🏠 Feed", "📸 Upload"], label_visibility="collapsed")
+    page = st.sidebar.radio("Navigate", ["Feed", "Upload"], label_visibility="collapsed")
 
-    if page == "🏠 Feed":
+    if page == "Feed":
         feed_page()
     else:
         upload_page()
