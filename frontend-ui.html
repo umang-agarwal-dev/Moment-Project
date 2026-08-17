@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moment</title>
+<style>
+  :root{
+    --bg:#F5F5F5;
+    --surface:#FFFFFF;
+    --border:#E0E0E0;
+    --text:#111111;
+    --text-secondary:#6B6B6B;
+    --accent:#111111;
+    --accent-hover:#000000;
+    --danger:#1A1A1A;
+    --success:#1A1A1A;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:10px;
+    --shadow-sm:0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md:0 8px 30px rgba(0,0,0,0.08);
+    --sidebar-w:240px;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    background:var(--bg);
+    color:var(--text);
+    color-scheme:light;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;}
+
+  /* ---------- Layout shells ---------- */
+  #app{height:100%;}
+  .hidden{display:none !important;}
+
+  /* ---------- Auth screen ---------- */
+  #auth-screen{
+    height:100%;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;
+  }
+  .orb{
+    position:absolute;border-radius:50%;filter:blur(90px);opacity:0.5;
+  }
+  .orb-1{width:420px;height:420px;background:#D8D8D8;top:-120px;left:-100px;}
+  .orb-2{width:380px;height:380px;background:#C4C4C4;bottom:-140px;right:-80px;}
+  .orb-3{width:300px;height:300px;background:#EAEAEA;top:40%;left:60%;}
+
+  .auth-card{
+    position:relative;z-index:2;
+    width:380px;
+    background:rgba(255,255,255,0.75);
+    backdrop-filter:blur(24px) saturate(180%);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);
+    border:1px solid rgba(255,255,255,0.6);
+    border-radius:28px;
+    padding:44px 36px 36px;
+    box-shadow:var(--shadow-md);
+    text-align:center;
+  }
+  .auth-mark{
+    width:40px;height:40px;margin:0 auto 16px;border-radius:10px;
+    background:var(--text);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:19px;font-weight:700;letter-spacing:-0.01em;
+  }
+  .auth-title{font-size:22px;font-weight:600;letter-spacing:-0.01em;margin:0 0 4px;}
+  .auth-subtitle{font-size:13px;color:var(--text-secondary);margin:0 0 28px;}
+
+  .segmented{
+    display:flex;background:rgba(118,118,128,0.12);border-radius:999px;
+    padding:3px;margin-bottom:22px;
+  }
+  .segmented button{
+    flex:1;border:none;background:transparent;padding:8px 0;
+    border-radius:999px;font-size:13px;font-weight:600;color:var(--text-secondary);
+    cursor:pointer;transition:all .2s ease;
+  }
+  .segmented button.active{background:#fff;color:var(--text);box-shadow:var(--shadow-sm);}
+
+  .field{margin-bottom:14px;text-align:left;}
+  .field label{font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;}
+  .field input{
+    width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--border);
+    background:#FFFFFF;font-size:14px;color:#111111;caret-color:#111111;outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input::placeholder{color:#8A8A8E;opacity:1;}
+  .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,0,0,0.12);}
+
+  .btn-primary{
+    width:100%;padding:12px 0;border:none;border-radius:999px;
+    background:var(--accent);color:#fff;font-size:15px;font-weight:600;
+    cursor:pointer;margin-top:8px;transition:background .15s ease, transform .05s ease;
+  }
+  .btn-primary:hover{background:var(--accent-hover);}
+  .btn-primary:active{transform:scale(0.98);}
+  .btn-primary:disabled{background:#C7C7CC;cursor:not-allowed;}
+
+  .auth-msg{margin-top:14px;font-size:13px;min-height:16px;}
+  .auth-msg.error{color:var(--danger);}
+  .auth-msg.success{color:#333333;}
+
+  /* ---------- Main app shell ---------- */
+  #main-shell{display:flex;height:100%;}
+  .sidebar{
+    width:var(--sidebar-w);flex-shrink:0;
+    background:var(--surface);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;padding:22px 16px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:28px;}
+  .brand-mark{
+    width:20px;height:20px;border-radius:5px;background:var(--text);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:11px;font-weight:700;
+  }
+  .brand-name{font-size:16px;font-weight:600;letter-spacing:-0.01em;}
+
+  .nav-item{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;
+    font-size:14px;font-weight:500;color:var(--text-secondary);cursor:pointer;
+    margin-bottom:4px;transition:background .15s ease,color .15s ease;
+  }
+  .nav-item:hover{background:rgba(0,0,0,0.04);}
+  .nav-item.active{background:rgba(0,0,0,0.07);color:var(--accent);font-weight:600;}
+  .nav-icon{width:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+  .sidebar-spacer{flex:1;}
+  .sidebar-user{
+    border-top:1px solid var(--border);padding-top:14px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .avatar{
+    width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1A1A1A,#5A5A5A);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;flex-shrink:0;
+  }
+  .user-meta{min-width:0;}
+  .user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-email{font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .logout-btn{
+    margin-left:auto;border:none;background:transparent;color:var(--text-secondary);
+    cursor:pointer;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  }
+  .logout-btn:hover{background:rgba(0,0,0,0.05);color:var(--danger);}
+
+  /* ---------- Content area ---------- */
+  .content{flex:1;overflow-y:auto;padding:36px 40px 100px;position:relative;}
+  .content-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;max-width:640px;}
+  .content-title{font-size:28px;font-weight:700;letter-spacing:-0.02em;margin:0;}
+  .content-count{
+    font-size:12px;font-weight:600;color:var(--text-secondary);
+    background:rgba(0,0,0,0.06);border:1px solid var(--border);
+    padding:4px 12px;border-radius:999px;white-space:nowrap;
+  }
+
+  .feed-wrap{max-width:640px;margin:0 auto;}
+
+  .empty-state{
+    max-width:640px;margin:60px auto 0;text-align:center;color:var(--text-secondary);
+  }
+  .empty-state .icon{display:flex;justify-content:center;margin-bottom:14px;color:var(--text-secondary);}
+  .empty-state .cta{
+    margin-top:18px;display:inline-block;padding:10px 22px;border-radius:999px;
+    background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer;border:none;
+  }
+
+  /* ---------- Post card ---------- */
+  .post{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:18px;margin-bottom:20px;transition:box-shadow .2s ease, transform .2s ease;
+  }
+  .post:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+  .post-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .post-meta{flex:1;min-width:0;}
+  .post-author{font-size:14px;font-weight:700;}
+  .post-date{font-size:12px;color:var(--text-secondary);}
+  .post-delete{
+    border:none;background:transparent;color:var(--text-secondary);cursor:pointer;
+    font-size:15px;padding:6px;border-radius:8px;opacity:0;transition:opacity .15s ease,color .15s ease,background .15s ease;
+  }
+  .post:hover .post-delete{opacity:1;}
+  .post-delete:hover{color:#000000;background:rgba(0,0,0,0.08);}
+
+  .post-media{width:100%;border-radius:var(--radius-md);overflow:hidden;background:#f0f0f0;}
+  .post-media img{width:100%;display:block;max-height:480px;object-fit:cover;cursor:zoom-in;}
+  .post-media video{width:100%;display:block;max-height:480px;object-fit:cover;}
+  .post-caption{font-size:14px;line-height:1.5;margin-top:12px;color:#111111;background:transparent;}
+
+  /* ---------- Floating compose button ---------- */
+  .fab{
+    position:fixed;right:40px;bottom:36px;
+    width:56px;height:56px;border-radius:50%;
+    background:var(--accent);color:#fff;border:none;
+    font-size:24px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    transition:transform .15s ease,background .15s ease;
+  }
+  .fab:hover{background:var(--accent-hover);transform:scale(1.06);}
+  .fab:active{transform:scale(0.96);}
+
+  /* ---------- Modal (compose) ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;z-index:50;
+    animation:fadeIn .15s ease;
+  }
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .modal{
+    width:440px;max-width:90vw;background:var(--surface);border-radius:24px;
+    padding:26px;box-shadow:var(--shadow-md);
+  }
+  .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .modal-title{font-size:18px;font-weight:700;margin:0;}
+  .modal-close{border:none;background:rgba(0,0,0,0.05);width:28px;height:28px;border-radius:50%;
+    font-size:14px;cursor:pointer;color:var(--text-secondary);}
+
+  .dropzone{
+    border:2px dashed var(--border);border-radius:16px;padding:26px 16px;text-align:center;
+    color:var(--text-secondary);font-size:13px;cursor:pointer;transition:border-color .15s ease,background .15s ease;
+    margin-bottom:14px;
+  }
+  .dropzone:hover, .dropzone.drag{border-color:var(--accent);background:rgba(0,0,0,0.04);}
+  .dropzone .icon{display:flex;justify-content:center;margin-bottom:8px;color:var(--text-secondary);}
+  .dropzone-preview{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .dropzone-preview img,
+  .dropzone-preview video{
+    max-width:100%;max-height:220px;border-radius:10px;display:block;
+    background:#000;object-fit:contain;
+  }
+  .preview-name{font-size:12px;color:var(--text);margin-top:8px;font-weight:600;}
+
+  .modal textarea{
+    width:100%;border:1px solid var(--border);border-radius:14px;padding:12px 14px;
+    font-family:inherit;font-size:14px;resize:none;outline:none;min-height:80px;
+    background:#FFFFFF;color:#111111;caret-color:#111111;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .modal textarea::placeholder{color:#8A8A8E;opacity:1;}
+  .modal textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,0,0,0.12);}
+
+  /* Inline upload-page textarea uses the same rules as the modal one */
+  #caption-inline{
+    width:100%;border:1px solid var(--border);border-radius:14px;padding:12px 14px;
+    font-family:inherit;font-size:14px;resize:none;outline:none;min-height:80px;
+    background:#FFFFFF;color:#111111;caret-color:#111111;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  #caption-inline::placeholder{color:#8A8A8E;opacity:1;}
+  #caption-inline:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,0,0,0.12);}
+
+  /* ---------- Lightbox (fullscreen media viewer) ---------- */
+  .lightbox-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:200;
+    display:flex;align-items:center;justify-content:center;
+    animation:fadeIn .15s ease;cursor:zoom-out;
+  }
+  .lightbox-overlay img,
+  .lightbox-overlay video{
+    max-width:92vw;max-height:92vh;object-fit:contain;
+    border-radius:6px;cursor:default;
+  }
+  .lightbox-close{
+    position:absolute;top:20px;right:24px;
+    width:38px;height:38px;border-radius:50%;
+    background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:background .15s ease;
+  }
+  .lightbox-close:hover{background:rgba(255,255,255,0.2);}
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed;top:24px;right:24px;z-index:100;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .toast-item{
+    background:var(--text);color:#fff;padding:12px 18px;border-radius:14px;
+    font-size:13px;font-weight:500;box-shadow:var(--shadow-md);
+    display:flex;align-items:center;gap:8px;
+    animation:slideIn .2s ease;
+  }
+  .toast-item.toast-error{border-left:3px solid #999999;}
+  @keyframes slideIn{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:720px){
+    .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:40;transform:translateX(-100%);transition:transform .2s ease;}
+    .sidebar.open{transform:translateX(0);}
+    .content{padding:24px 18px 100px;}
+    .fab{right:20px;bottom:20px;}
+    .mobile-topbar{display:flex;}
+  }
+  .mobile-topbar{display:none;align-items:center;gap:12px;margin-bottom:18px;}
+  .hamburger{border:none;background:var(--surface);border:1px solid var(--border);width:36px;height:36px;
+    border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== AUTH SCREEN ===================== -->
+  <div id="auth-screen">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="auth-card">
+      <div class="auth-mark">M</div>
+      <h1 class="auth-title">Moment</h1>
+      <p class="auth-subtitle">Share moments with people who matter</p>
+
+      <div class="segmented">
+        <button id="tab-login" class="active" onclick="setAuthMode('login')">Sign In</button>
+        <button id="tab-signup" onclick="setAuthMode('signup')">Create Account</button>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••">
+      </div>
+
+      <button class="btn-primary" id="auth-submit" onclick="submitAuth()">Sign In</button>
+      <div class="auth-msg" id="auth-msg"></div>
+    </div>
+  </div>
+
+  <!-- ===================== MAIN APP ===================== -->
+  <div id="main-shell" class="hidden">
+    <div class="sidebar" id="sidebar">
+      <div class="brand"><span class="brand-mark">M</span><span class="brand-name">Moment</span></div>
+
+      <div class="nav-item active" id="nav-feed" onclick="showPage('feed')">
+        <span class="nav-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>
+        </span> Feed
+      </div>
+      <div class="nav-item" id="nav-upload" onclick="showPage('upload')">
+        <span class="nav-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15.5 16.5 11 6 21"/></svg>
+        </span> Upload
+      </div>
+
+      <div class="sidebar-spacer"></div>
+
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">?</div>
+        <div class="user-meta">
+          <div class="user-name" id="user-name">—</div>
+          <div class="user-email" id="user-email-small">—</div>
+        </div>
+        <button class="logout-btn" title="Log out" onclick="logout()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="mobile-topbar">
+        <button class="hamburger" onclick="toggleSidebar()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+        </button>
+      </div>
+
+      <!-- Feed page -->
+      <div id="page-feed">
+        <div class="content-header">
+          <h2 class="content-title">Feed</h2>
+          <span class="content-count" id="post-count" style="display:none;"></span>
+        </div>
+        <div class="feed-wrap" id="feed-list"></div>
+      </div>
+
+      <!-- Upload page (simple full page fallback; modal is primary flow) -->
+      <div id="page-upload" class="hidden">
+        <div class="content-header"><h2 class="content-title">Share Something</h2></div>
+        <div class="feed-wrap">
+          <p style="color:var(--text-secondary);font-size:14px;">Use the compose button in the corner, or drop a file below.</p>
+          <div class="dropzone" id="dropzone-inline" onclick="document.getElementById('file-input').click()">
+            <div class="dropzone-placeholder" id="dropzone-placeholder-inline">
+              <span class="icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+              </span>
+              Click or drag a photo / video here
+            </div>
+            <div class="dropzone-preview hidden" id="dropzone-preview-inline">
+              <img id="dropzone-preview-img-inline" alt="Selected preview">
+              <video id="dropzone-preview-video-inline" class="hidden" muted controls></video>
+              <div class="preview-name" id="preview-name-inline"></div>
+            </div>
+          </div>
+          <textarea id="caption-inline" placeholder="What's on your mind?"></textarea>
+          <button class="btn-primary" style="margin-top:14px;" onclick="submitUpload()">Share</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="fab" title="New post" onclick="openComposeModal()">+</button>
+  </div>
+
+</div>
+
+<!-- ===================== COMPOSE MODAL ===================== -->
+<div class="modal-overlay hidden" id="compose-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">New Post</h3>
+      <button class="modal-close" onclick="closeComposeModal()">✕</button>
+    </div>
+    <div class="dropzone" id="dropzone-modal" onclick="document.getElementById('file-input').click()">
+      <div class="dropzone-placeholder" id="dropzone-placeholder-modal">
+        <span class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+        </span>
+        Click or drag a photo / video here
+      </div>
+      <div class="dropzone-preview hidden" id="dropzone-preview-modal">
+        <img id="dropzone-preview-img-modal" alt="Selected preview">
+        <video id="dropzone-preview-video-modal" class="hidden" muted controls></video>
+        <div class="preview-name" id="preview-name-modal"></div>
+      </div>
+    </div>
+    <textarea id="caption-modal" placeholder="What's on your mind?"></textarea>
+    <button class="btn-primary" id="share-btn" onclick="submitUpload()">Share</button>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept="image/*,video/*" class="hidden" onchange="handleFileSelect(event)">
+
+<div id="toast"></div>
+
+<div class="lightbox-overlay hidden" id="lightbox-overlay" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox(event)" aria-label="Close">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+  </button>
+  <img id="lightbox-img" class="hidden" alt="Full size view">
+  <video id="lightbox-video" class="hidden" controls autoplay></video>
+</div>
+
+<script>
+/* ============================================================
+   Config — point this at your FastAPI backend.
+   Your backend must have CORS enabled for this to work
+   (see the note under the file in chat).
+   ============================================================ */
+const API_BASE = "http://localhost:8000";
+
+let state = {
+  token: null,
+  user: null,
+  authMode: "login",
+  selectedFile: null,
+  previewUrl: null,
+};
+
+/* ---------------- Per-user avatar color ----------------
+   Same email always maps to the same color, so each person
+   is visually distinguishable across the feed and sidebar. */
+const AVATAR_PALETTE = [
+  ['#4C6EF5', '#748FFC'], // blue
+  ['#D6336C', '#F783AC'], // pink
+  ['#2F9E44', '#69DB7C'], // green
+  ['#E8590C', '#FFA94D'], // orange
+  ['#7048E8', '#B197FC'], // purple
+  ['#0C8599', '#66D9E8'], // teal
+  ['#C92A2A', '#FF8787'], // red
+  ['#5C940D', '#A9E34B'], // olive
+  ['#AE3EC9', '#DA77F2'], // magenta
+  ['#1864AB', '#4DABF7'], // deep blue
+];
+
+function hashString(str){
+  let hash = 0;
+  for(let i = 0; i < str.length; i++){
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function avatarGradientForEmail(email){
+  const idx = hashString(email || '') % AVATAR_PALETTE.length;
+  const [c1, c2] = AVATAR_PALETTE[idx];
+  return `linear-gradient(135deg, ${c1}, ${c2})`;
+}
+
+/* ---------------- Auth ---------------- */
+function setAuthMode(mode){
+  state.authMode = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
+  document.getElementById('auth-submit').textContent = mode === 'login' ? 'Sign In' : 'Create Account';
+  document.getElementById('auth-msg').textContent = '';
+}
+
+async function submitAuth(){
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const msg = document.getElementById('auth-msg');
+  msg.className = 'auth-msg';
+  msg.textContent = '';
+
+  if(!email || !password){
+    msg.textContent = 'Enter your email and password.';
+    msg.className = 'auth-msg error';
+    return;
+  }
+
+  const btn = document.getElementById('auth-submit');
+  btn.disabled = true;
+
+  try{
+    if(state.authMode === 'login'){
+      const form = new URLSearchParams();
+      form.append('username', email);
+      form.append('password', password);
+
+      const res = await fetch(`${API_BASE}/auth/jwt/login`, { method:'POST', body: form });
+      if(res.ok){
+        const data = await res.json();
+        state.token = data.access_token;
+
+        const userRes = await fetch(`${API_BASE}/auth/me`, { headers: authHeaders() });
+        if(userRes.ok){
+          state.user = await userRes.json();
+          enterApp();
+        } else {
+          msg.textContent = 'Failed to load your profile.';
+          msg.className = 'auth-msg error';
+        }
+      } else {
+        msg.textContent = 'Invalid email or password.';
+        msg.className = 'auth-msg error';
+      }
+    } else {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method:'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password })
+      });
+      if(res.status === 201){
+        msg.textContent = 'Account created — you can sign in now.';
+        msg.className = 'auth-msg success';
+        setAuthMode('login');
+      } else {
+        const err = await res.json().catch(()=>({}));
+        msg.textContent = err.detail || 'Registration failed.';
+        msg.className = 'auth-msg error';
+      }
+    }
+  } catch(e){
+    msg.textContent = 'Could not reach the server. Is the backend running?';
+    msg.className = 'auth-msg error';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function authHeaders(){
+  return state.token ? { 'Authorization': `Bearer ${state.token}` } : {};
+}
+
+function enterApp(){
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('main-shell').classList.remove('hidden');
+
+  const initials = state.user.email.slice(0,2).toUpperCase();
+  const avatarEl = document.getElementById('user-avatar');
+  avatarEl.textContent = initials;
+  avatarEl.style.background = avatarGradientForEmail(state.user.email);
+  document.getElementById('user-name').textContent = state.user.email.split('@')[0];
+  document.getElementById('user-email-small').textContent = state.user.email;
+
+  loadFeed();
+}
+
+function logout(){
+  state.token = null;
+  state.user = null;
+  document.getElementById('main-shell').classList.add('hidden');
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+}
+
+/* ---------------- Navigation ---------------- */
+function showPage(page){
+  document.getElementById('page-feed').classList.toggle('hidden', page !== 'feed');
+  document.getElementById('page-upload').classList.toggle('hidden', page !== 'upload');
+  document.getElementById('nav-feed').classList.toggle('active', page === 'feed');
+  document.getElementById('nav-upload').classList.toggle('active', page === 'upload');
+  if(page === 'feed') loadFeed();
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ---------------- Feed ---------------- */
+async function loadFeed(){
+  const list = document.getElementById('feed-list');
+  const countEl = document.getElementById('post-count');
+  try{
+    const res = await fetch(`${API_BASE}/feed`, { headers: authHeaders() });
+    if(!res.ok) throw new Error('feed failed');
+    const data = await res.json();
+    const posts = data.posts || [];
+
+    if(posts.length){
+      countEl.textContent = `${posts.length} post${posts.length !== 1 ? 's' : ''}`;
+      countEl.style.display = 'inline-block';
+    } else {
+      countEl.textContent = '';
+      countEl.style.display = 'none';
+    }
+
+    if(posts.length === 0){
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </div>
+          <div>No posts yet — be the first to share something.</div>
+          <button class="cta" onclick="openComposeModal()">Create a post</button>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = posts.map(renderPost).join('');
+  } catch(e){
+    list.innerHTML = `<div class="empty-state">Couldn't load the feed. Is the backend running?</div>`;
+  }
+}
+
+function renderPost(post){
+  const initials = (post.email || '?').slice(0,2).toUpperCase();
+  const date = (post.created_at || '').slice(0,10);
+  const mediaHtml = post.file_type === 'video'
+    ? `<video src="${post.url}" controls></video>`
+    : `<img src="${post.url}" alt="post media" onclick="openLightbox('image', '${post.url}')">`;
+  const deleteBtn = post.is_owner
+    ? `<button class="post-delete" title="Delete" onclick="deletePost('${post.id}')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>`
+    : '';
+
+  return `
+    <div class="post">
+      <div class="post-top">
+        <div class="avatar" style="width:30px;height:30px;font-size:11px;background:${avatarGradientForEmail(post.email)};">${initials}</div>
+        <div class="post-meta">
+          <div class="post-author">${post.email}</div>
+          <div class="post-date">${date}</div>
+        </div>
+        ${deleteBtn}
+      </div>
+      <div class="post-media">${mediaHtml}</div>
+      ${post.caption ? `<div class="post-caption">${escapeHtml(post.caption)}</div>` : ''}
+    </div>`;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ---------------- Lightbox ---------------- */
+function openLightbox(type, url){
+  const overlay = document.getElementById('lightbox-overlay');
+  const img = document.getElementById('lightbox-img');
+  const video = document.getElementById('lightbox-video');
+
+  if(type === 'video'){
+    img.classList.add('hidden');
+    img.src = '';
+    video.classList.remove('hidden');
+    video.src = url;
+  } else {
+    video.classList.add('hidden');
+    video.pause();
+    video.src = '';
+    img.classList.remove('hidden');
+    img.src = url;
+  }
+
+  overlay.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(e){
+  // Only close on backdrop / close-button clicks, not clicks on the media itself
+  if(e && e.target && (e.target.id === 'lightbox-img' || e.target.id === 'lightbox-video')) return;
+
+  const overlay = document.getElementById('lightbox-overlay');
+  const video = document.getElementById('lightbox-video');
+  video.pause();
+  video.src = '';
+  overlay.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    const overlay = document.getElementById('lightbox-overlay');
+    if(!overlay.classList.contains('hidden')) closeLightbox();
+  }
+});
+
+async function deletePost(id){
+  try{
+    const res = await fetch(`${API_BASE}/posts/${id}`, { method:'DELETE', headers: authHeaders() });
+    if(res.ok){
+      showToast('Post deleted');
+      loadFeed();
+    } else {
+      showToast('Failed to delete post', 'error');
+    }
+  } catch(e){
+    showToast('Could not reach the server', 'error');
+  }
+}
+
+/* ---------------- Upload / Compose ---------------- */
+function openComposeModal(){
+  document.getElementById('compose-overlay').classList.remove('hidden');
+}
+function closeComposeModal(){
+  document.getElementById('compose-overlay').classList.add('hidden');
+  resetComposeForm();
+}
+
+function handleFileSelect(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  setSelectedFile(file);
+}
+
+function setSelectedFile(file){
+  state.selectedFile = file;
+
+  // Revoke any previous object URL to avoid leaking memory
+  if(state.previewUrl){
+    URL.revokeObjectURL(state.previewUrl);
+  }
+  const url = URL.createObjectURL(file);
+  state.previewUrl = url;
+
+  const isVideo = file.type.startsWith('video/');
+
+  ['modal','inline'].forEach(scope => {
+    document.getElementById(`dropzone-placeholder-${scope}`).classList.add('hidden');
+    document.getElementById(`dropzone-preview-${scope}`).classList.remove('hidden');
+
+    const img = document.getElementById(`dropzone-preview-img-${scope}`);
+    const video = document.getElementById(`dropzone-preview-video-${scope}`);
+
+    if(isVideo){
+      img.classList.add('hidden');
+      video.classList.remove('hidden');
+      video.src = url;
+    } else {
+      video.classList.add('hidden');
+      video.removeAttribute('src');
+      img.classList.remove('hidden');
+      img.src = url;
+    }
+
+    document.getElementById(`preview-name-${scope}`).textContent = file.name;
+  });
+}
+
+// drag & drop support
+['dropzone-modal','dropzone-inline'].forEach(id=>{
+  const el = document.getElementById(id);
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag'); });
+  el.addEventListener('dragleave', () => el.classList.remove('drag'));
+  el.addEventListener('drop', e => {
+    e.preventDefault();
+    el.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if(file){
+      setSelectedFile(file);
+    }
+  });
+});
+
+function resetComposeForm(){
+  state.selectedFile = null;
+  if(state.previewUrl){
+    URL.revokeObjectURL(state.previewUrl);
+    state.previewUrl = null;
+  }
+  document.getElementById('file-input').value = '';
+
+  ['modal','inline'].forEach(scope => {
+    document.getElementById(`dropzone-placeholder-${scope}`).classList.remove('hidden');
+    document.getElementById(`dropzone-preview-${scope}`).classList.add('hidden');
+    document.getElementById(`preview-name-${scope}`).textContent = '';
+    const img = document.getElementById(`dropzone-preview-img-${scope}`);
+    const video = document.getElementById(`dropzone-preview-video-${scope}`);
+    img.src = '';
+    video.removeAttribute('src');
+  });
+
+  document.getElementById('caption-modal').value = '';
+  document.getElementById('caption-inline').value = '';
+}
+
+async function submitUpload(){
+  if(!state.selectedFile){
+    showToast('Choose a photo or video first', 'error');
+    return;
+  }
+  const caption = document.getElementById('caption-modal').value
+    || document.getElementById('caption-inline').value
+    || '';
+
+  const shareBtn = document.getElementById('share-btn');
+  shareBtn.disabled = true;
+  shareBtn.textContent = 'Uploading...';
+
+  try{
+    const formData = new FormData();
+    formData.append('file', state.selectedFile);
+    formData.append('caption', caption);
+
+    const res = await fetch(`${API_BASE}/upload`, {
+      method:'POST',
+      headers: authHeaders(), // do NOT set Content-Type manually for FormData
+      body: formData
+    });
+
+    if(res.ok){
+      showToast('Uploaded successfully');
+      closeComposeModal();
+      showPage('feed');
+    } else {
+      showToast('Upload failed', 'error');
+    }
+  } catch(e){
+    showToast('Could not reach the server', 'error');
+  } finally {
+    shareBtn.disabled = false;
+    shareBtn.textContent = 'Share';
+  }
+}
+
+/* ---------------- Toast ---------------- */
+function showToast(text, type = 'default'){
+  const container = document.getElementById('toast');
+  const item = document.createElement('div');
+  item.className = 'toast-item' + (type === 'error' ? ' toast-error' : '');
+  item.textContent = text;
+  container.appendChild(item);
+  setTimeout(() => item.remove(), 3000);
+}
+</script>
+</body>
+</html>
