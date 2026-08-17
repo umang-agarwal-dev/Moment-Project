@@ -161,8 +161,27 @@ than just say "learned a lot":
 
 ## 📸 Screenshots
 
-<!-- Add screenshots or a short demo GIF here -->
-<!-- e.g. ![Feed screenshot](screenshots/feed.png) -->
+### Frontend #2 — Custom HTML / CSS / JS UI
+
+<p align="center">
+  <img src="assets/login_ui.png" width="45%" />
+  <img src="assets/upload_ui.png" width="45%" />
+</p>
+<p align="center">
+  <img src="assets/Moment_feed.png" width="45%" />
+  <img src="assets/Moment_feed_video.png" width="45%" />
+</p>
+
+### Frontend #1 — Streamlit UI
+
+<p align="center">
+  <img src="assets/streamlit_login.png" width="45%" />
+  <img src="assets/streamlit_upload.png" width="45%" />
+</p>
+<p align="center">
+  <img src="assets/streamlit_feed.png" width="45%" />
+  <img src="assets/stream_feed2.png" width="45%" />
+</p>
 
 ---
 
